@@ -1,0 +1,61 @@
+version: "3.9"
+volumes:
+  my-volume:
+    external: true
+networks:
+  default:
+    external:
+      name: testnetwork
+
+services:
+  medicalfiledc:
+    container_name: medicalfiledc
+    image: medicalfile
+    ports:
+      - 8086:8086
+    networks:
+      default:
+        aliases:
+          - medicalfile
+    depends_on:
+      - medicalfilesql
+  storemanagmentdc:
+    container_name: storemanagmentdc
+    image: storemanagement
+    ports:
+      - 8085:8085
+    networks:
+      default:
+        aliases:
+          - storemanagment
+    depends_on:
+      - storemanagmentsql
+
+  storemanagmentsql:
+    image: mysql:5.7
+    container_name: storemanagmentsql
+    ports:
+      - 8099:3306
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_DATABASE=storemanagement
+    volumes:
+      - my-volume:/var/lib/storemanagmentmysql
+    networks:
+      default:
+        aliases:
+          - storemanagmentsql
+  medicalfilesql:
+    image: mysql:5.7
+    container_name: medicalfilesql
+    ports:
+      - 8098:3306
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_DATABASE=medicalfile
+    volumes:
+      - my-volume:/var/lib/medicalfilemysql
+    networks:
+      default:
+        aliases:
+          - medicalfilesql
